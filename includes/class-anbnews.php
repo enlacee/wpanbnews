@@ -74,6 +74,7 @@ class Anbnews {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+		$this->define_admin_custompost_hooks();
 		$this->define_public_hooks();
 
 	}
@@ -112,6 +113,7 @@ class Anbnews {
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin-custompost.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -154,6 +156,12 @@ class Anbnews {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+	}
+
+	private function define_admin_custompost_hooks()
+	{
+		$plugin = new Anbnews_Admin_CustomPost($this->get_plugin_name(), $this->get_version());
+		$this->loader->add_action('init', $plugin, 'create_post_type');
 	}
 
 	/**
