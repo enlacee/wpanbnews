@@ -163,7 +163,8 @@ class Anbnews {
 		$plugin = new Anbnews_Admin_CustomPost($this->get_plugin_name(), $this->get_version());
 		$this->loader->add_action('init', $plugin, 'create_post_type');
 		$this->loader->add_action('init', $plugin, 'create_taxonomy');
-		
+		$this->loader->add_action('add_meta_boxes', $plugin, 'create_metabox');
+
 	}
 
 	/**

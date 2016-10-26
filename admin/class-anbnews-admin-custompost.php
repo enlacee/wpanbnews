@@ -42,7 +42,7 @@ class Anbnews_Admin_CustomPost {
 			'description'         => __('News make by google.news', 'anbnews'),
 			'labels'              => $labels,
 			// Todo lo que soporta este post type
-			'supports'            => array('title', 'editor', 'author', 'thumbnail', 'comments', 'revisions'),
+			'supports'            => array('title', 'editor', 'thumbnail', 'revisions'),
 			/* Un Post Type hierarchical es como las paginas y puede tener padres e hijos.
 			* Uno sin hierarchical es como los posts
 			*/
@@ -68,17 +68,17 @@ class Anbnews_Admin_CustomPost {
 	public function create_taxonomy()
 	{
 		$labels = array(
-			'name'              => _x('Type News', 'anbnews'),
-			'singular_name'     => _x('Type New', 'anbnews'),
+			'name'              => _x('Categories news', 'anbnews'),
+			'singular_name'     => _x('Category new', 'anbnews'),
 			'search_items'      => __('Search from category new', 'anbnews'),
-			'popular_items'		=> __('Popular Category News', 'anbnews'),
-			'all_items'         => __('All Category news', 'anbnews'),
-			'parent_item'       => __('Type News Category Parent', 'anbnews'),
-			'parent_item_colon' => __('Type News Category Parent', 'anbnews'),
-			'edit_item'         => __('Edit New Category'),
-			'update_item'       => __('Update Category New'),
-			'add_new_item'      => __('Add Category New'),
-			'new_item_name'     => __('New Category New'),
+			'popular_items'		=> __('Popular category News', 'anbnews'),
+			'all_items'         => __('All category news', 'anbnews'),
+			'parent_item'       => __('Type news category parent', 'anbnews'),
+			'parent_item_colon' => __('Type news category parent', 'anbnews'),
+			'edit_item'         => __('Edit new category'),
+			'update_item'       => __('Update category new'),
+			'add_new_item'      => __('Add category new'),
+			'new_item_name'     => __('New category new'),
 			'menu_name'         => __('Categories'),
 		);
 
@@ -105,4 +105,25 @@ class Anbnews_Admin_CustomPost {
 			)
 		);
 	}
+
+	// crear metabox
+	public function create_metabox()
+	{
+		add_meta_box(
+			"ga-metaboxes",
+			"Nuestro Metabox",
+			array($this, 'ga_diseno_metaboxes'),
+			self::$cpName,
+			"normal",
+			"high",
+			null
+		);
+	}
+
+	// callback
+	public function ga_diseno_metaboxes()
+	{
+		echo "hola mundo";
+	}
+
 }
