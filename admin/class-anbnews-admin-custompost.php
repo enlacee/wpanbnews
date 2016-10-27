@@ -120,10 +120,80 @@ class Anbnews_Admin_CustomPost {
 		);
 	}
 
-	// callback
-	public function ga_diseno_metaboxes()
+	/*
+	* callback : mostrar la vista del metabox
+	*/
+	public function ga_diseno_metaboxes($post)
 	{
-		echo "hola mundo";
+		wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+		?>
+		<div>
+		<label for="input-metabox">Calorias:</label>
+		<input name="input-metabox" type="text"
+		value="<?php echo get_post_meta($post->ID, "input-metabox", true); ?>"/>
+		<br/>
+
+		<label for="textarea-metabox">Subtitulo del Post:</label>
+		<textarea name="textarea-metabox"><?php echo get_post_meta($post->ID, "textarea-metabox", true); ?></textarea>
+		<br/>
+
+		<label for="dropdown-metabox">Calificación:</label>
+			<select name="dropdown-metabox">
+			<?php
+				$opciones = array(1, 2, 3, 4, 5);
+				foreach ($opciones as $llave => $valor) {
+					if ($valor == get_post_meta($post->ID, "dropdown-metabox", true)) { ?>
+						<option selected><?php echo $valor; ?></option>
+					<?php } else { ?>
+						<option><?php echo $valor; ?></option>
+					 <?php }
+				} //fin foreach
+			?>
+			</select>
+		<br>
+		</div>
+		<?php
+	}
+
+	/**
+	*
+	* Guardar valores de la vista metabox
+	*/
+	public function save_metaboxes($post_id, $post, $update)
+	{
+		if (!isset($_POST['meta-box-nonce'])
+			|| !wp_verify_nonce($_POST['meta-box-nonce'], basename(__FILE__))) {
+			return $post_id;
+		}
+
+		if (!current_user_can('edit_post', $post_id)) {
+			return $post_id;
+		}
+
+		if (defined("DOING_AUTOSAVE") && DOING_AUTOSAVE) {
+			return $post_id;
+		}
+
+		$input_metabox = "";
+		$textarea_metabox = "";
+		$dropdown_metabox = "";
+
+		// save data
+		if (isset($_POST['input-metabox'])) {
+			$input_metabox = $_POST['input-metabox'];
+		}
+		update_post_meta($post_id, 'input-metabox', $input_metabox);
+
+		if (isset($_POST['textarea-metabox'])) {
+			$input_metabox = $_POST['textarea-metabox'];
+		}
+		update_post_meta($post_id, 'textarea-metabox', $input_metabox);
+
+		if (isset($_POST['dropdown-metabox'])) {
+			$input_metabox = $_POST['dropdown-metabox'];
+		}
+		update_post_meta($post_id, 'dropdown-metabox', $input_metabox);
+
 	}
 
 }
