@@ -65,10 +65,13 @@ class Anbnews_Admin_CustomPost {
 		register_post_type(self::$cpName, $args);
 	}
 
-	public function create_taxonomy()
+	/*
+	* Add taxonomy Category new
+	*/
+	public function create_taxonomy_new()
 	{
 		$labels = array(
-			'name'              => _x('Categories news', 'anbnews'),
+			'name'              => _x('Categories', 'anbnews'),
 			'singular_name'     => _x('Category new', 'anbnews'),
 			'search_items'      => __('Search from category new', 'anbnews'),
 			'popular_items'		=> __('Popular category News', 'anbnews'),
@@ -92,9 +95,13 @@ class Anbnews_Admin_CustomPost {
 		);
 
 		register_taxonomy('category-new', array(self::$cpName), $args);
+	}
 
-
-		// add
+	/*
+	* Add taxonomy Tag new
+	*/
+	public function create_taxonomy_new_tag()
+	{
 		register_taxonomy(
 			'category-newtag',
 			self::$cpName,
@@ -104,6 +111,43 @@ class Anbnews_Admin_CustomPost {
 				'hierarchical' => false,
 			)
 		);
+	}
+	
+	/*
+	* Add taxonomy Category agency
+	*/
+	public function create_taxonomy_agency()
+	{
+		$labels = array(
+			'name'              => _x('Agencies', 'anbnews'),
+			'singular_name'     => _x('Agencies', 'anbnews'),
+			'search_items'      => __('Search from agencies', 'anbnews'),
+			'popular_items'		=> __('Popular agencies', 'anbnews'),
+			'all_items'         => __('All agencies', 'anbnews'),
+			'parent_item'       => __('Type agency parent', 'anbnews'),
+			'parent_item_colon' => __('Type agency parent', 'anbnews'),
+			'edit_item'         => __('Edit new agency'),
+			'update_item'       => __('Update agency new'),
+			'add_new_item'      => __('Add agency new'),
+			'new_item_name'     => __('New agency new'),
+			'menu_name'         => __('Agencies'),
+		);
+
+		$args = array(
+			'hierarchical'      => true,
+			'labels'            => $labels,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'rewrite' 			=> array(
+				'slug' => 'agencies',
+				'with_front' => false, // Don't display the category base before "/locations/"
+				'hierarchical' => true // This will allow URL's like "/locations/boston/cambridge/"
+			),
+		);
+
+		register_taxonomy('agencies', array(self::$cpName), $args);
+
 	}
 
 	// crear metabox
