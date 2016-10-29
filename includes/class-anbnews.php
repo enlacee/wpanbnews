@@ -66,10 +66,11 @@ class Anbnews {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
+	public function __construct($file) {
 
 		$this->plugin_name = 'anbnews';
 		$this->version = '1.0.0';
+		$this->file = $file;
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -160,7 +161,7 @@ class Anbnews {
 
 	private function define_admin_custompost_hooks()
 	{
-		$plugin = new Anbnews_Admin_CustomPost($this->get_plugin_name(), $this->get_version());
+		$plugin = new Anbnews_Admin_CustomPost($this->get_plugin_name(), $this->get_version(), $this->file);
 		$this->loader->add_action('init', $plugin, 'create_post_type');
 		$this->loader->add_action('init', $plugin, 'create_taxonomy_new');
 		$this->loader->add_action('init', $plugin, 'create_taxonomy_agency');
@@ -168,6 +169,8 @@ class Anbnews {
 
 		$this->loader->add_action('add_meta_boxes', $plugin, 'create_metabox');
 		$this->loader->add_action('save_post', $plugin, 'save_metaboxes', 10, 3);
+
+		$this->loader->add_action('admin_menu', $plugin, 'add_menu');
 
 	}
 

@@ -68,7 +68,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-anbnews.php';
  */
 function run_anbnews() {
 
-	$plugin = new Anbnews();
+	$plugin = new Anbnews(__FILE__);
 	$plugin->run();
 
 }

@@ -4,14 +4,18 @@ class Anbnews_Admin_CustomPost {
 
 	private $plugin_name;
 	private $version;
+	private $file;
+
 	public static $cpName = 'news'; // Custom post name
 
 	/**
 	* Build
 	*/
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name, $version, $file) {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->file = $file;
+
 	}
 
 	/**
@@ -112,7 +116,7 @@ class Anbnews_Admin_CustomPost {
 			)
 		);
 	}
-	
+
 	/*
 	* Add taxonomy Category agency
 	*/
@@ -240,4 +244,53 @@ class Anbnews_Admin_CustomPost {
 
 	}
 
+	/*
+	* Agregar menu
+	*/
+	public function add_menu()
+	{
+		add_menu_page(
+			'Settings news',
+			'Settings news',
+			'manage_options', // capability *admin*
+			$this->file,
+			array($this, 'callback_menu_content'),
+			null,
+			null
+		);
+
+		// Add submenu
+		add_submenu_page(
+			$this->file,
+			'Cron visual',
+			'Cron visual',
+			'manage_options', // capability *admin*
+			$this->file . '_cron-visual',
+			array($this, 'callback_submenu_cron_visual')
+		);
+
+		add_submenu_page(
+			$this->file,
+			'About it',
+			'About it',
+			'manage_options',
+			$this->file . '_about-it',
+			array($this, 'callback_submenu_about_it')
+		);
+	}
+
+	static function callback_menu_content()
+	{
+		esc_html_e( 'Admin Page Test', 'anbnews' );
+	}
+
+	static function callback_submenu_cron_visual()
+	{
+		echo "submenu : cron visual";
+	}
+
+	static function callback_submenu_about_it()
+	{
+		echo "submenu : about it";
+	}
 }
