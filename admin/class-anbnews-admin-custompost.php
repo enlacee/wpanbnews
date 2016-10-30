@@ -268,29 +268,22 @@ class Anbnews_Admin_CustomPost {
 			$this->file . '_cron-visual',
 			array($this, 'callback_submenu_cron_visual')
 		);
-
-		add_submenu_page(
-			$this->file,
-			'About it',
-			'About it',
-			'manage_options',
-			$this->file . '_about-it',
-			array($this, 'callback_submenu_about_it')
-		);
 	}
 
 	static function callback_menu_content()
 	{
-		esc_html_e( 'Admin Page Test', 'anbnews' );
+		?>
+		<div class=”wrap”>
+		<?php screen_icon(); ?>
+		<h2>My plugin</h2>
+		<form action=”options.php” method=”post”>
+		</form></div>
+		<?php
+
 	}
 
 	static function callback_submenu_cron_visual()
 	{
 		echo "submenu : cron visual";
-	}
-
-	static function callback_submenu_about_it()
-	{
-		echo "submenu : about it";
 	}
 }

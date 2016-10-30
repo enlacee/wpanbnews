@@ -22,15 +22,17 @@
  */
 class Anbnews_Activator {
 
-	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
-	 */
-	public static function activate() {
+	/*
+	* Registrar metadatos al instalar el plugin
+	* - install_date: Fecha en UTC general.
+	*/
+	public static function activate()
+	{
+		$plugin = Anbnews::getInstance();
 
+		$my_options = $plugin->microData;
+		$my_options['install_date'] = date('Y-d-m H:i:s');
+		update_option('an_anbnews_options', $my_options);
 	}
 
 }

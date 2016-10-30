@@ -57,6 +57,19 @@ class Anbnews {
 	 */
 	protected $version;
 
+	public $microData;
+
+	private static $instance;
+
+	public static function getInstance()
+	{
+		 if (!isset(self::$instance)) {
+			self::$instance = new Anbnews();
+		}
+
+		return self::$instance;
+	}
+
 	/**
 	 * Define the core functionality of the plugin.
 	 *
@@ -66,11 +79,13 @@ class Anbnews {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct($file) {
-
+	public function __construct()
+	{
+		// variables default
 		$this->plugin_name = 'anbnews';
 		$this->version = '1.0.0';
-		$this->file = $file;
+		$this->plugin_file = an_get_file_path();
+		$this->plugin_dir = an_get_dir_path();
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -78,6 +93,12 @@ class Anbnews {
 		$this->define_admin_custompost_hooks();
 		$this->define_public_hooks();
 
+		$this->microData = array(
+			'plugin_name'	=> $this->get_plugin_name(),
+			'version'		=> $this->get_version(),
+			'plugin_file'	=> $this->plugin_file,
+			'plugin_dir'	=> $this->plugin_dir
+		);
 	}
 
 	/**
@@ -161,7 +182,11 @@ class Anbnews {
 
 	private function define_admin_custompost_hooks()
 	{
-		$plugin = new Anbnews_Admin_CustomPost($this->get_plugin_name(), $this->get_version(), $this->file);
+		$plugin = new Anbnews_Admin_CustomPost(
+			$this->get_plugin_name(),
+			$this->get_version(),
+			$this->plugin_file
+		);
 		$this->loader->add_action('init', $plugin, 'create_post_type');
 		$this->loader->add_action('init', $plugin, 'create_taxonomy_new');
 		$this->loader->add_action('init', $plugin, 'create_taxonomy_agency');

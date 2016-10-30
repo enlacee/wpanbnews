@@ -59,17 +59,20 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-anbnews.php';
 
 /**
  * Begins execution of the plugin.
- *
- * Since everything within the plugin is registered via hooks,
- * then kicking off the plugin from this point in the file does
- * not affect the page life cycle.
- *
- * @since    1.0.0
- */
-function run_anbnews() {
+*/
+$plugin = Anbnews::getInstance();
+$plugin->run();
 
-	$plugin = new Anbnews(__FILE__);
-	$plugin->run();
 
+/*
+* Usefull functions prefix: an = anbNews
+*/
+function an_get_file_path()
+{
+	return __FILE__;
 }
-run_anbnews();
+
+function an_get_dir_path()
+{
+	return plugin_dir_path(__FILE__);
+}
