@@ -268,6 +268,15 @@ class Anbnews_Admin_CustomPost {
 			$this->file . '_cron-settings',
 			array($this, 'boj_view_cron_settings')
 		);
+
+		// Resetear el CRON: cambiar de horario
+		/*
+		//get time of next scheduled run
+		$timestamp = wp_next_scheduled( 'boj_cron_hook');
+		//unschedule custom action hook
+		wp_unschedule_event( $timestamp, 'boj_cron_hook');
+		*/
+
 	}
 
 	static function callback_menu_content()
@@ -301,7 +310,8 @@ class Anbnews_Admin_CustomPost {
 		// verify
 		if (!wp_next_scheduled('boj_cron_hook')) {
 			// schedule the event to run
-			wp_schedule_event(time(), 'hourly', 'boj_cron_hook');
+			//wp_schedule_event(time(), 'hourly', 'boj_cron_hook');
+			wp_schedule_event(time(), 'minute', 'boj_cron_hook');
 		}
 
 		$cron = _get_cron_array();
@@ -346,6 +356,23 @@ class Anbnews_Admin_CustomPost {
 		</div>
 		<?php
 
+	}
+
+	/*
+	* Agregr otro horario para el cron
+	*/
+	public function my_add_intervals($schedules)
+	{
+		$schedules['minute'] = array(
+		'interval' => 60,
+		'display' => __('Minute')
+		);
+		$schedules['12hours'] = array(
+		'interval' => 43200,
+		'display' => '12hours'
+		);
+
+		return $schedules;
 	}
 
 }

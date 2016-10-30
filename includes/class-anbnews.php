@@ -196,6 +196,8 @@ class Anbnews {
 		$this->loader->add_action('save_post', $plugin, 'save_metaboxes', 10, 3);
 		// setting cron
 		$this->loader->add_action('admin_menu', $plugin, 'add_menu');
+		//agregar mas horarios y ejecutar el hooks: /wp-cron.php
+		$this->loader->add_filter('cron_schedules', $plugin, 'my_add_intervals',10 ,1);
 		$this->loader->add_action('boj_cron_hook',$plugin ,'boj_cron_email_reminder');
 	}
 
