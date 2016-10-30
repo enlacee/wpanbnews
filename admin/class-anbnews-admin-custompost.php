@@ -262,11 +262,11 @@ class Anbnews_Admin_CustomPost {
 		// Add submenu
 		add_submenu_page(
 			$this->file,
-			'Cron visual',
-			'Cron visual',
+			'Cron settings',
+			'Cron settings',
 			'manage_options', // capability *admin*
-			$this->file . '_cron-visual',
-			array($this, 'callback_submenu_cron_visual')
+			$this->file . '_cron-settings',
+			array($this, 'boj_view_cron_settings')
 		);
 	}
 
@@ -282,8 +282,70 @@ class Anbnews_Admin_CustomPost {
 
 	}
 
-	static function callback_submenu_cron_visual()
+	static function callback_submenu_cron_settings()
 	{
 		echo "submenu : cron visual";
 	}
+
+	/**
+	* Cron action
+	*/
+	public function boj_cron_email_reminder()
+	{
+		error_log("CORREO ENVIADO a anibal@pprios.com");
+	}
+
+	// view
+	public static function boj_view_cron_settings()
+	{
+		// verify
+		if (!wp_next_scheduled('boj_cron_hook')) {
+			// schedule the event to run
+			wp_schedule_event(time(), 'hourly', 'boj_cron_hook');
+		}
+
+		$cron = _get_cron_array();
+		$schedules = wp_get_schedules();
+		$date_format = 'M j, Y @ G:i';
+	?>
+		<div class=”wrap” id=”cron-gui”>
+		<h2>Cron Events Scheduled</h2>
+		<table class=”widefat fixed”>
+		<thead>
+		<tr>
+		<th scope=”col”>Next Run (GMT/UTC)</th>
+		<th scope=”col”>Schedule</th>
+		<th scope=”col”>Hook Name</th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( $cron as $timestamp => $cronhooks ) { ?>
+		<?php foreach ( (array) $cronhooks as $hook => $events )
+		{ ?>
+		<?php foreach ( (array) $events as $event ) { ?>
+		<tr>
+		<td>
+		<?php echo date_i18n( $date_format, wp_next_scheduled( $hook ) ); ?>
+		</td>
+		<td>
+		<?php
+		if ( $event['schedule'] ) {
+			echo $schedules[$event['schedule']]['display'];
+		} else {
+		?>One-time<?php
+		}
+		?>
+		</td>
+		<td><?php echo $hook; ?></td>
+		</tr>
+		<?php } ?>
+		<?php } ?>
+		<?php } ?>
+		</tbody>
+		</table>
+		</div>
+		<?php
+
+	}
+
 }

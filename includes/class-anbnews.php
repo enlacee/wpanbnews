@@ -194,9 +194,9 @@ class Anbnews {
 
 		$this->loader->add_action('add_meta_boxes', $plugin, 'create_metabox');
 		$this->loader->add_action('save_post', $plugin, 'save_metaboxes', 10, 3);
-
+		// setting cron
 		$this->loader->add_action('admin_menu', $plugin, 'add_menu');
-
+		$this->loader->add_action('boj_cron_hook',$plugin ,'boj_cron_email_reminder');
 	}
 
 	/**
