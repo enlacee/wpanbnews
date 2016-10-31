@@ -198,7 +198,11 @@ class Anbnews {
 		$this->loader->add_action('admin_menu', $plugin, 'add_menu');
 		//agregar mas horarios y ejecutar el hooks: /wp-cron.php
 		$this->loader->add_filter('cron_schedules', $plugin, 'my_add_intervals',10 ,1);
+		$this->loader->add_filter('wp_feed_cache_transient_lifetime', $plugin, 'my_cache_filter_handler',10 ,1);
+
+		//crons
 		$this->loader->add_action('boj_cron_hook',$plugin ,'boj_cron_email_reminder');
+		$this->loader->add_action('an_cron_read_feed',$plugin ,'cron_read_feed');
 	}
 
 	/**

@@ -7,9 +7,11 @@ class Anbnews_Admin_CustomPost {
 	private $file;
 
 	public static $cpName = 'news'; // Custom post name
+	public static $taxonomyNew = 'category-new';
+	public static $taxonomyNewTag = 'category-new-tag';
 
 	/**
-	* Build
+	* construct
 	*/
 	public function __construct( $plugin_name, $version, $file) {
 		$this->plugin_name = $plugin_name;
@@ -95,10 +97,10 @@ class Anbnews_Admin_CustomPost {
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite' => array('slug' => 'category-new'),
+			'rewrite' => array('slug' => self::$taxonomyNew),
 		);
 
-		register_taxonomy('category-new', array(self::$cpName), $args);
+		register_taxonomy(self::$taxonomyNew, array(self::$cpName), $args);
 	}
 
 	/*
@@ -107,11 +109,11 @@ class Anbnews_Admin_CustomPost {
 	public function create_taxonomy_new_tag()
 	{
 		register_taxonomy(
-			'category-newtag',
+			self::$taxonomyNewTag,
 			self::$cpName,
 			array(
 				'label' => __('Tags news', 'anbnews'),
-				'rewrite' => array('slug' => 'category-newtag'),
+				'rewrite' => array('slug' => self::$taxonomyNewTag),
 				'hierarchical' => false,
 			)
 		);
@@ -289,6 +291,8 @@ class Anbnews_Admin_CustomPost {
 		</form></div>
 		<?php
 
+
+		do_action('an_cron_read_feed');
 	}
 
 	static function callback_submenu_cron_settings()
@@ -375,4 +379,122 @@ class Anbnews_Admin_CustomPost {
 		return $schedules;
 	}
 
+
+	/*
+	* Cron Noticias
+	*/
+	public function cron_read_feed()
+	{
+		$feed  = fetch_feed('https://news.google.com.pe/news?cf=all&hl=es&pz=1&ned=es_pe&output=rss');
+		// echo "<pre>";
+		// var_dump(get_class_methods($feed));
+		// echo "<pre>";
+
+		$items = $feed->get_items();
+		// echo $feed->get_language();
+		// echo "<br>";
+		// echo $feed->subscribe_url();
+		// echo "<br>";
+		// echo $feed->get_title();
+		// echo "<br>";
+		// echo $feed->get_category();
+		// echo "<br>";
+
+
+		if (isset($items[0]) && get_class($items[0]) == 'SimplePie_Item') {
+			$transport = $items[0]->feed->data['child'];
+			$mode = current($transport);
+			$rss = $mode['rss'];
+			$child = current($rss[0]['child']);
+			$child2 = current($child['channel'][0]['child']);
+
+			$items = $child2['item'];
+			foreach ($items as $item) {
+				$i_title = current($item['child'])['title'][0]['data'];
+				$i_link = $this->_getLink(current($item['child'])['link'][0]['data']);
+				$i_guid = current($item['child'])['guid'][0]['data'];
+				$i_category = current($item['child'])['category'][0]['data'];
+				$i_pubDate = current($item['child'])['pubDate'][0]['data'];
+				$i_description = current($item['child'])['pubDate'][0]['data'];
+
+				// variables post
+				$term_id = $this->_getOrInsertTaxonomy($i_category);
+				$my_post = array(
+					'post_title'	=> $i_title,
+					'post_content'	=> '',
+					'post_status'	=> 'publish',
+					'post_author'	=> 1,
+					'post_type'		=> self::$cpName,
+				);
+				/*
+				// Insert the post into the database.
+				$post_id = wp_insert_post($my_post);
+				$cat_ids = array($term_id);
+
+				$cat_ids = array_map('intval', $cat_ids);
+				$cat_ids = array_unique($cat_ids);
+				wp_set_object_terms($post_id, $cat_ids, self::$taxonomyNew, false);
+				wp_set_object_terms($post_id, array("tag01", "tag02"), self::$taxonomyNewTag, false);
+				*/
+
+				echo "<pre>";
+				print_r($item);
+				echo "</pre>";
+				//break;
+			}
+		}
+	}
+
+	/**
+	* Retornar Url
+	*/
+	private function _getLink($str)
+	{
+		$rs = false;
+		if (preg_match("#url=#", $str)) {
+			$part = preg_split("#url=#", $str);
+			$rs= $part[1];
+		}
+
+		return $rs;
+	}
+
+	/*
+	* Obtener Id de la taxonomia
+	* agrega o recupera el ID del termino.
+	*/
+	private function _getOrInsertTaxonomy($nameCategory)
+	{
+		$term = term_exists($nameCategory, self::$taxonomyNew);
+		if ($term !== 0 && $term !== null) {
+			// existe
+		} else {
+			$term = wp_insert_term($nameCategory, self::$taxonomyNew);
+		}
+
+		return $term['term_id'];
+	}
+
+	/**
+	* Retornar solo el nombre de la Agencia o el Diario.
+	*/
+	private function _getAgengieName($string)
+	{
+		return false;
+	}
+
+	/**
+	* Establecer el cache a 1hora
+	*/
+	public function my_cache_filter_handler($seconds)
+	{
+		$currentSeconds = $seconds;
+/*		if (getenv('APP_ENV') == 'development') {
+			$currentSeconds = 30;
+		} else {
+			$currentSeconds = 60*60;
+		}
+*/
+		return $currentSeconds;
+	}
 }
