@@ -160,12 +160,12 @@ class Anbnews_Admin_CustomPost {
 	public function create_metabox()
 	{
 		add_meta_box(
-			"ga-metaboxes",
-			"Nuestro Metabox",
+			"an-metaboxes",
+			esc_html__('Information Additional', 'anbnews'),
 			array($this, 'ga_diseno_metaboxes'),
 			self::$cpName,
 			"normal",
-			"high",
+			"default",
 			null
 		);
 	}
@@ -175,32 +175,18 @@ class Anbnews_Admin_CustomPost {
 	*/
 	public function ga_diseno_metaboxes($post)
 	{
-		wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+		wp_nonce_field(basename($this->file), "meta-box-nonce");
 		?>
 		<div>
-		<label for="input-metabox">Calorias:</label>
-		<input name="input-metabox" type="text"
-		value="<?php echo get_post_meta($post->ID, "input-metabox", true); ?>"/>
-		<br/>
+			<label for="_anews-input-url">URL:</label>
+			<input name="_anews-input-url" type="text" class="form-input-tip"
+			value="<?php echo get_post_meta($post->ID, "_anews-input-url", true); ?>"/>
+			<br/>
 
-		<label for="textarea-metabox">Subtitulo del Post:</label>
-		<textarea name="textarea-metabox"><?php echo get_post_meta($post->ID, "textarea-metabox", true); ?></textarea>
-		<br/>
-
-		<label for="dropdown-metabox">Calificación:</label>
-			<select name="dropdown-metabox">
-			<?php
-				$opciones = array(1, 2, 3, 4, 5);
-				foreach ($opciones as $llave => $valor) {
-					if ($valor == get_post_meta($post->ID, "dropdown-metabox", true)) { ?>
-						<option selected><?php echo $valor; ?></option>
-					<?php } else { ?>
-						<option><?php echo $valor; ?></option>
-					 <?php }
-				} //fin foreach
-			?>
-			</select>
-		<br>
+			<label for="_anews-input-pub-date">Pub Date:</label>
+			<input name="_anews-input-pub-date" type="text" class="form-input-tip"
+			value="<?php echo get_post_meta($post->ID, "_anews-input-pub-date", true); ?>"/>
+			<br/>
 		</div>
 		<?php
 	}
@@ -212,7 +198,7 @@ class Anbnews_Admin_CustomPost {
 	public function save_metaboxes($post_id, $post, $update)
 	{
 		if (!isset($_POST['meta-box-nonce'])
-			|| !wp_verify_nonce($_POST['meta-box-nonce'], basename(__FILE__))) {
+			|| !wp_verify_nonce($_POST['meta-box-nonce'], basename($this->file))) {
 			return $post_id;
 		}
 
@@ -225,24 +211,18 @@ class Anbnews_Admin_CustomPost {
 		}
 
 		$input_metabox = "";
-		$textarea_metabox = "";
-		$dropdown_metabox = "";
+		$input_metabox2 = "";
 
 		// save data
-		if (isset($_POST['input-metabox'])) {
-			$input_metabox = $_POST['input-metabox'];
+		if (isset($_POST['_anews-input-url'])) {
+			$input_metabox = $_POST['_anews-input-url'];
 		}
-		update_post_meta($post_id, 'input-metabox', $input_metabox);
+		update_post_meta($post_id, '_anews-input-url', $input_metabox);
 
-		if (isset($_POST['textarea-metabox'])) {
-			$input_metabox = $_POST['textarea-metabox'];
+		if (isset($_POST['_anews-input-pub-date'])) {
+			$input_metabox2 = $_POST['_anews-input-pub-date'];
 		}
-		update_post_meta($post_id, 'textarea-metabox', $input_metabox);
-
-		if (isset($_POST['dropdown-metabox'])) {
-			$input_metabox = $_POST['dropdown-metabox'];
-		}
-		update_post_meta($post_id, 'dropdown-metabox', $input_metabox);
+		update_post_meta($post_id, '_anews-input-pub-date', $input_metabox2);
 
 	}
 
@@ -477,6 +457,7 @@ class Anbnews_Admin_CustomPost {
 
 	/**
 	* Retornar solo el nombre de la Agencia o el Diario.
+	* todo: sacar solo porcion necesario con preg_split
 	*/
 	private function _getAgengieName($string)
 	{
