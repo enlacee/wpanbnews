@@ -6,7 +6,7 @@ class Anbnews_Admin_CustomPost {
 	private $version;
 	private $file;
 
-	public static $cpName = 'news'; // Custom post name
+	public static $cpName = 'noticia'; // Custom post name
 	public static $taxonomyNew = 'category-new';
 	public static $taxonomyNewTag = 'category-new-tag';
 	public static $taxonomyAgency = 'agencia';
@@ -182,16 +182,17 @@ class Anbnews_Admin_CustomPost {
 		<div>
 			<label for="<?php echo self::$prefixMeta ?>input-guid">GUID:</label>
 			<input name="<?php echo self::$prefixMeta ?>input-guid" type="text" class="form-input-tip" disabled
-			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-guid', true); ?>"/>
+			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-guid', true); ?>"
+			style="width:100%"/>
 			<br/>
 
 			<label for="<?php echo self::$prefixMeta ?>input-url">URL:</label>
-			<input name="<?php echo self::$prefixMeta ?>input-url" type="text" class="form-input-tip"
+			<input name="<?php echo self::$prefixMeta ?>input-url" type="text" class="form-input-tip" disabled
 			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-url', true); ?>"/>
 			<br/>
 
 			<label for="<?php echo self::$prefixMeta ?>input-pub-date">Pub Date:</label>
-			<input name="<?php echo self::$prefixMeta ?>input-pub-date" type="text" class="form-input-tip"
+			<input name="<?php echo self::$prefixMeta ?>input-pub-date" type="text" class="form-input-tip" disabled
 			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-pub-date', true); ?>"/>
 			<br/>
 		</div>
@@ -221,15 +222,15 @@ class Anbnews_Admin_CustomPost {
 		$input_metabox2 = "";
 
 		// save data
-		if (isset($_POST['_anews-input-url'])) {
-			$input_metabox = $_POST['_anews-input-url'];
+		if (isset($_POST[self::$prefixMeta . 'input-url'])) {
+			$input_metabox = $_POST[self::$prefixMeta . 'input-url'];
 		}
-		update_post_meta($post_id, '_anews-input-url', $input_metabox);
+		update_post_meta($post_id, self::$prefixMeta . 'input-url', $input_metabox);
 
-		if (isset($_POST['_anews-input-pub-date'])) {
-			$input_metabox2 = $_POST['_anews-input-pub-date'];
+		if (isset($_POST[self::$prefixMeta . 'input-pub-date'])) {
+			$input_metabox2 = $_POST[self::$prefixMeta . 'input-pub-date'];
 		}
-		update_post_meta($post_id, '_anews-input-pub-date', $input_metabox2);
+		update_post_meta($post_id, self::$prefixMeta . 'input-pub-date', $input_metabox2);
 
 	}
 
@@ -438,11 +439,12 @@ class Anbnews_Admin_CustomPost {
 				add_post_meta($post_id, self::$prefixMeta .'input-pub-date', $i_pubDate);
 
 
-				// echo "<pre>";
-				// print_r($item);
-				// echo "</pre>";
+				echo "<pre>";
+				echo "{$i_guid} <br>";
+				//print_r($item);
+				echo "</pre>";
 				echo "Cron executed!" . "<br>";
-				exit;
+				//exit;
 			}
 		}
 	}

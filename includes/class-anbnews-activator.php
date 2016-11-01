@@ -33,6 +33,9 @@ class Anbnews_Activator {
 		$my_options = $plugin->microData;
 		$my_options['install_date'] = date('Y-d-m H:i:s');
 		update_option('an_anbnews_options', $my_options);
+
+		// crear tabla
+
 	}
 
 }

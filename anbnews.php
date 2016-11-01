@@ -37,6 +37,12 @@ if ( ! defined( 'WPINC' ) ) {
 function activate_anbnews() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-anbnews-activator.php';
 	Anbnews_Activator::activate();
+
+	// crear tabla
+	require_once plugin_dir_path( __FILE__ ) . 'admin/class-anbnews-admin-table.php';
+	$table = new Anbnews_Admin_Table();
+	$table->install();
+	$table->install_data();
 }
 
 /**
@@ -46,6 +52,11 @@ function activate_anbnews() {
 function deactivate_anbnews() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-anbnews-deactivator.php';
 	Anbnews_Deactivator::deactivate();
+
+	// remove tabla
+	require_once plugin_dir_path( __FILE__ ) . 'admin/class-anbnews-admin-table.php';
+	$table = new Anbnews_Admin_Table();
+	$table->uninstall();
 }
 
 register_activation_hook( __FILE__, 'activate_anbnews' );
