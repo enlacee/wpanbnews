@@ -9,6 +9,8 @@ class Anbnews_Admin_CustomPost {
 	public static $cpName = 'news'; // Custom post name
 	public static $taxonomyNew = 'category-new';
 	public static $taxonomyNewTag = 'category-new-tag';
+	public static $taxonomyAgency = 'agencia';
+	public static $prefixMeta = '_anews-';
 
 	/**
 	* construct
@@ -77,7 +79,7 @@ class Anbnews_Admin_CustomPost {
 	public function create_taxonomy_new()
 	{
 		$labels = array(
-			'name'              => _x('Categories', 'anbnews'),
+			'name'              => _x('Category', 'anbnews'),
 			'singular_name'     => _x('Category new', 'anbnews'),
 			'search_items'      => __('Search from category new', 'anbnews'),
 			'popular_items'		=> __('Popular category News', 'anbnews'),
@@ -125,8 +127,8 @@ class Anbnews_Admin_CustomPost {
 	public function create_taxonomy_agency()
 	{
 		$labels = array(
-			'name'              => _x('Agencies', 'anbnews'),
-			'singular_name'     => _x('Agencies', 'anbnews'),
+			'name'              => _x('Agency', 'anbnews'),
+			'singular_name'     => _x('Agency', 'anbnews'),
 			'search_items'      => __('Search from agencies', 'anbnews'),
 			'popular_items'		=> __('Popular agencies', 'anbnews'),
 			'all_items'         => __('All agencies', 'anbnews'),
@@ -146,13 +148,13 @@ class Anbnews_Admin_CustomPost {
 			'show_admin_column' => true,
 			'query_var'         => true,
 			'rewrite' 			=> array(
-				'slug' => 'agencies',
+				'slug' => self::$taxonomyAgency,
 				'with_front' => false, // Don't display the category base before "/locations/"
 				'hierarchical' => true // This will allow URL's like "/locations/boston/cambridge/"
 			),
 		);
 
-		register_taxonomy('agencies', array(self::$cpName), $args);
+		register_taxonomy(self::$taxonomyAgency, array(self::$cpName), $args);
 
 	}
 
@@ -178,14 +180,19 @@ class Anbnews_Admin_CustomPost {
 		wp_nonce_field(basename($this->file), "meta-box-nonce");
 		?>
 		<div>
-			<label for="_anews-input-url">URL:</label>
-			<input name="_anews-input-url" type="text" class="form-input-tip"
-			value="<?php echo get_post_meta($post->ID, "_anews-input-url", true); ?>"/>
+			<label for="<?php echo self::$prefixMeta ?>input-guid">GUID:</label>
+			<input name="<?php echo self::$prefixMeta ?>input-guid" type="text" class="form-input-tip" disabled
+			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-guid', true); ?>"/>
 			<br/>
 
-			<label for="_anews-input-pub-date">Pub Date:</label>
-			<input name="_anews-input-pub-date" type="text" class="form-input-tip"
-			value="<?php echo get_post_meta($post->ID, "_anews-input-pub-date", true); ?>"/>
+			<label for="<?php echo self::$prefixMeta ?>input-url">URL:</label>
+			<input name="<?php echo self::$prefixMeta ?>input-url" type="text" class="form-input-tip"
+			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-url', true); ?>"/>
+			<br/>
+
+			<label for="<?php echo self::$prefixMeta ?>input-pub-date">Pub Date:</label>
+			<input name="<?php echo self::$prefixMeta ?>input-pub-date" type="text" class="form-input-tip"
+			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-pub-date', true); ?>"/>
 			<br/>
 		</div>
 		<?php
@@ -396,31 +403,46 @@ class Anbnews_Admin_CustomPost {
 				$i_category = current($item['child'])['category'][0]['data'];
 				$i_pubDate = current($item['child'])['pubDate'][0]['data'];
 				$i_description = current($item['child'])['pubDate'][0]['data'];
+				$i_guid = current($item['child'])['guid'][0]['data'];
 
 				// variables post
-				$term_id = $this->_getOrInsertTaxonomy($i_category);
+				$term_id = $this->_getIdTaxonomy($i_category, self::$taxonomyNew);
+				$agencyName = $this->_getTitle($i_title, "category");
+				$term_id2 = $this->_getIdTaxonomy($agencyName, self::$taxonomyAgency);
+
 				$my_post = array(
-					'post_title'	=> $i_title,
+					'post_title'	=> $this->_getTitle($i_title, 'main'),
 					'post_content'	=> '',
 					'post_status'	=> 'publish',
 					'post_author'	=> 1,
 					'post_type'		=> self::$cpName,
 				);
-				/*
+
 				// Insert the post into the database.
 				$post_id = wp_insert_post($my_post);
+				// Agregar categoria new
 				$cat_ids = array($term_id);
-
 				$cat_ids = array_map('intval', $cat_ids);
 				$cat_ids = array_unique($cat_ids);
 				wp_set_object_terms($post_id, $cat_ids, self::$taxonomyNew, false);
-				wp_set_object_terms($post_id, array("tag01", "tag02"), self::$taxonomyNewTag, false);
-				*/
+				// Agregar categoria agency
+				$cat_ids2 = array($term_id2);
+				$cat_ids2 = array_map('intval', $cat_ids2);
+				$cat_ids2 = array_unique($cat_ids2);
+				wp_set_object_terms($post_id, $cat_ids2, self::$taxonomyAgency, false);
+				// wp_set_object_terms($post_id, array("tag01", "tag02"), self::$taxonomyNewTag, false);
 
-				echo "<pre>";
-				print_r($item);
-				echo "</pre>";
-				//break;
+				// agregar metadatos
+				add_post_meta($post_id, self::$prefixMeta .'input-guid', $i_guid, true);
+				add_post_meta($post_id, self::$prefixMeta .'input-url', $i_link);
+				add_post_meta($post_id, self::$prefixMeta .'input-pub-date', $i_pubDate);
+
+
+				// echo "<pre>";
+				// print_r($item);
+				// echo "</pre>";
+				echo "Cron executed!" . "<br>";
+				exit;
 			}
 		}
 	}
@@ -442,14 +464,21 @@ class Anbnews_Admin_CustomPost {
 	/*
 	* Obtener Id de la taxonomia
 	* agrega o recupera el ID del termino.
+	* @param String
+	* @param String
 	*/
-	private function _getOrInsertTaxonomy($nameCategory)
+	private function _getIdTaxonomy($nameCategory, $taxonomyName)
 	{
-		$term = term_exists($nameCategory, self::$taxonomyNew);
+		$term = term_exists($nameCategory, $taxonomyName);
 		if ($term !== 0 && $term !== null) {
 			// existe
 		} else {
-			$term = wp_insert_term($nameCategory, self::$taxonomyNew);
+			$term = wp_insert_term($nameCategory, $taxonomyName);
+		}
+
+		// return false *error*
+		if (is_a($term, 'WP_Error')) {
+			return false;
 		}
 
 		return $term['term_id'];
@@ -459,9 +488,19 @@ class Anbnews_Admin_CustomPost {
 	* Retornar solo el nombre de la Agencia o el Diario.
 	* todo: sacar solo porcion necesario con preg_split
 	*/
-	private function _getAgengieName($string)
+	private function _getTitle($string, $slug)
 	{
-		return false;
+		$rs = false;
+		$start = strrpos($string, "-");
+		if ($start !== false) {
+			if ($slug == 'category') {
+				$rs = trim(substr($string, $start+1));
+			} else if ($slug == 'main') {
+				$rs = trim(substr($string, 0, $start));
+			}
+		}
+
+		return $rs;
 	}
 
 	/**
