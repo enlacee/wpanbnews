@@ -4,6 +4,17 @@ class Anbnews_Admin_Table {
 
 	private $name;
 
+	private static $instance;
+
+	public static function getInstance()
+	{
+		 if (!isset(self::$instance)) {
+			self::$instance = new self;
+		}
+
+		return self::$instance;
+	}
+
 	/**
 	* construct
 	*/
@@ -62,5 +73,92 @@ class Anbnews_Admin_Table {
 	{
 		global $wpdb;
 		$wpdb->query("DROP TABLE {$this->getName()}");
+	}
+
+	/**
+	* Registrar
+	* @param Int|False
+	*/
+	public function insert($items)
+	{
+		global $wpdb;
+		$table = $this->getName();
+		$rs = false;
+
+		$rs = $wpdb->insert(
+			$table,
+			array(
+				'guid' => $items['guid'],
+				'date_gmt' => $items['date_gmt']
+			),
+			array('%s', '%s')
+		);
+
+		return $rs;
+	}
+
+	/**
+	* Obtener todos los items, con guid existentes en DB
+	*
+	* @param Array
+	* @return Array
+	*/
+	public function exists_guid_get_array($guid)
+	{
+		global $wpdb;
+		$rs = array();
+
+		if (is_array($guid) && count($guid) > 0) {
+			$table = $this->getName();
+			$strAdd = '';
+
+			foreach ($guid as $key => $value) {
+				$strAdd .= "'{$value}',";
+			}
+			// remover ,
+			if (strrpos($strAdd, ",") !== false) {
+				$strAdd = substr($strAdd, 0, strlen($strAdd)-1);
+			}
+
+			$sql = "SELECT id, guid FROM {$table} WHERE guid IN ($strAdd);";
+			$results = $wpdb->get_results($sql, ARRAY_A);
+
+			if (is_array($results) && count($results) > 0) {
+				foreach ($results as $key => $value) {
+					$rs[] = $value['guid'];
+				}
+			}
+		}
+
+		return $rs;
+	}
+
+	/**
+	* Verificar si existe GUID registrado en DB
+	*
+	* @param String id
+	* @return Boolean
+	*/
+	public function exists_guid($guid)
+	{
+		$rs = true;
+		if (is_string($guid)) {
+			$meta_key = $guid;
+
+			$count = $wpdb->get_var($wpdb->prepare(
+				"
+				SELECT count(id)
+				FROM $table
+				WHERE guid = %s
+				",
+				$meta_key
+			));
+
+			if ($count == 0) {
+				$rs = false;
+			}
+		}
+
+		return $rs;
 	}
 }

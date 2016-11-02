@@ -64,7 +64,7 @@ class Anbnews {
 	public static function getInstance()
 	{
 		 if (!isset(self::$instance)) {
-			self::$instance = new Anbnews();
+			self::$instance = new self;
 		}
 
 		return self::$instance;
@@ -135,7 +135,9 @@ class Anbnews {
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin-table.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin-custompost.php';
+
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -201,8 +203,8 @@ class Anbnews {
 		$this->loader->add_filter('wp_feed_cache_transient_lifetime', $plugin, 'my_cache_filter_handler',10 ,1);
 
 		//crons
-		$this->loader->add_action('boj_cron_hook',$plugin ,'boj_cron_email_reminder');
-		$this->loader->add_action('an_cron_read_feed',$plugin ,'cron_read_feed');
+		$this->loader->add_action('anbnews_boj_cron_hook',$plugin ,'cron_email_reminder');
+		$this->loader->add_action('anbnews_cron_read_feed',$plugin ,'cron_read_feed');
 	}
 
 	/**

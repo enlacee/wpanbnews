@@ -40,9 +40,9 @@ function activate_anbnews() {
 
 	// crear tabla
 	require_once plugin_dir_path( __FILE__ ) . 'admin/class-anbnews-admin-table.php';
-	$table = new Anbnews_Admin_Table();
+	$table = Anbnews_Admin_Table::getInstance();
 	$table->install();
-	$table->install_data();
+	//$table->install_data();
 }
 
 /**
@@ -55,7 +55,7 @@ function deactivate_anbnews() {
 
 	// remove tabla
 	require_once plugin_dir_path( __FILE__ ) . 'admin/class-anbnews-admin-table.php';
-	$table = new Anbnews_Admin_Table();
+	$table = Anbnews_Admin_Table::getInstance();
 	$table->uninstall();
 }
 
