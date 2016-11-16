@@ -418,6 +418,9 @@ class Anbnews_Admin_CustomPost {
 					$i_pubDate = current($item['child'])['pubDate'][0]['data'];
 					$i_description = current($item['child'])['pubDate'][0]['data'];
 
+					// read HTML
+					$readOG = $this->_getOpenGraph($i_link);
+
 					// registrar en la tabla cron *principal*
 					$tableCron = Anbnews_Admin_Table::getInstance();
 					$id_row = $tableCron->insert(array(
@@ -455,6 +458,8 @@ class Anbnews_Admin_CustomPost {
 						// agregar metadatos
 						add_post_meta($post_id, self::$prefixMeta .'input-guid', $i_guid, true);
 						add_post_meta($post_id, self::$prefixMeta .'input-url', $i_link);
+						add_post_meta($post_id, self::$prefixMeta .'input-image-url', $readOG['img']);
+						add_post_meta($post_id, self::$prefixMeta .'input-description', $readOG['description']);
 						add_post_meta($post_id, self::$prefixMeta .'input-pub-date', $i_pubDate);
 
 					} else {
@@ -553,6 +558,30 @@ class Anbnews_Admin_CustomPost {
 		}
 
 		return $rs;
+	}
+
+	/**
+	* Obtener HTML Y obtener OpenGraph metas
+	*/
+	private function _getOpenGraph($url)
+	{
+		$html = file_get_contents($url);
+
+		/* get page's description */
+		$re ="<meta\s+property=['\"]??og:image['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
+		preg_match("/$re/siU", $html, $matches);
+		$img = $matches[1];
+
+		$re="<meta\s+name=['\"]??description['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
+		preg_match("/$re/siU", $html, $matches);
+		$desc = $matches[1];
+
+		$info = array(
+			"img" => $img,
+			"description" => $desc,
+		);
+
+		return $info;
 	}
 
 	/**
