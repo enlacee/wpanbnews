@@ -191,6 +191,11 @@ class Anbnews_Admin_CustomPost {
 			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-url', true); ?>"/>
 			<br/>
 
+			<label for="<?php echo self::$prefixMeta ?>input-image-url">URL:</label>
+			<input name="<?php echo self::$prefixMeta ?>input-image-url" type="text" class="form-input-tip" disabled
+			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-image-url', true); ?>"/>
+			<br/>
+
 			<label for="<?php echo self::$prefixMeta ?>input-pub-date">Pub Date:</label>
 			<input name="<?php echo self::$prefixMeta ?>input-pub-date" type="text" class="form-input-tip" disabled
 			value="<?php echo get_post_meta($post->ID, self::$prefixMeta . 'input-pub-date', true); ?>"/>
@@ -386,7 +391,7 @@ class Anbnews_Admin_CustomPost {
 	*/
 	public function cron_read_feed()
 	{
-		$feed  = fetch_feed('https://news.google.com.pe/news?cf=all&hl=es&pz=1&ned=es_pe&output=rss');
+		$feed  = fetch_feed('https://news.google.com.pe/news?cf=all&hl=es&pz=1&ned=es_pe&output=rss&num=15');
 		$items = $feed->get_items();
 		// echo $feed->get_language();
 		// echo "<br>";
@@ -420,53 +425,54 @@ class Anbnews_Admin_CustomPost {
 
 					// read HTML
 					$readOG = $this->_getOpenGraph($i_link);
+					if (is_array($readOG) && count($readOG) > 0 && $readOG !== false) {
+						// registrar en la tabla cron *principal*
+						$tableCron = Anbnews_Admin_Table::getInstance();
+						$id_row = $tableCron->insert(array(
+							'guid' => $i_guid,
+							'date_gmt' => gmdate('Y-m-d H:i:s', strtotime($i_pubDate))
+						));
 
-					// registrar en la tabla cron *principal*
-					$tableCron = Anbnews_Admin_Table::getInstance();
-					$id_row = $tableCron->insert(array(
-						'guid' => $i_guid,
-						'date_gmt' => gmdate('Y-m-d H:i:s', strtotime($i_pubDate))
-					));
+						if ($id_row !== false) {
+							// variables post
+							$term_id = $this->_getIdTaxonomy($i_category, self::$taxonomyNew);
+							$agencyName = $this->_getTitle($i_title, "category");
+							$term_id2 = $this->_getIdTaxonomy($agencyName, self::$taxonomyAgency);
 
-					if ($id_row !== false) {
-						// variables post
-						$term_id = $this->_getIdTaxonomy($i_category, self::$taxonomyNew);
-						$agencyName = $this->_getTitle($i_title, "category");
-						$term_id2 = $this->_getIdTaxonomy($agencyName, self::$taxonomyAgency);
+							$my_post = array(
+								'post_title'	=> $this->_getTitle($i_title, 'main'),
+								'post_content'	=> '',
+								'post_status'	=> 'publish',
+								'post_author'	=> 1,
+								'post_type'		=> self::$cpName,
+							);
 
-						$my_post = array(
-							'post_title'	=> $this->_getTitle($i_title, 'main'),
-							'post_content'	=> '',
-							'post_status'	=> 'publish',
-							'post_author'	=> 1,
-							'post_type'		=> self::$cpName,
-						);
+							// Insert the post into the database.
+							$post_id = wp_insert_post($my_post);
+							// Agregar categoria new
+							$cat_ids = array($term_id);
+							$cat_ids = array_map('intval', $cat_ids);
+							$cat_ids = array_unique($cat_ids);
+							wp_set_object_terms($post_id, $cat_ids, self::$taxonomyNew, false);
+							// Agregar categoria agency
+							$cat_ids2 = array($term_id2);
+							$cat_ids2 = array_map('intval', $cat_ids2);
+							$cat_ids2 = array_unique($cat_ids2);
+							wp_set_object_terms($post_id, $cat_ids2, self::$taxonomyAgency, false);
+							// wp_set_object_terms($post_id, array("tag01", "tag02"), self::$taxonomyNewTag, false);
+							// agregar metadatos
+							add_post_meta($post_id, self::$prefixMeta .'input-guid', $i_guid, true);
+							add_post_meta($post_id, self::$prefixMeta .'input-url', $i_link);
+							add_post_meta($post_id, self::$prefixMeta .'input-image-url', $readOG['img']);
+							add_post_meta($post_id, self::$prefixMeta .'input-description', $readOG['description']);
+							add_post_meta($post_id, self::$prefixMeta .'input-pub-date', $i_pubDate);
 
-						// Insert the post into the database.
-						$post_id = wp_insert_post($my_post);
-						// Agregar categoria new
-						$cat_ids = array($term_id);
-						$cat_ids = array_map('intval', $cat_ids);
-						$cat_ids = array_unique($cat_ids);
-						wp_set_object_terms($post_id, $cat_ids, self::$taxonomyNew, false);
-						// Agregar categoria agency
-						$cat_ids2 = array($term_id2);
-						$cat_ids2 = array_map('intval', $cat_ids2);
-						$cat_ids2 = array_unique($cat_ids2);
-						wp_set_object_terms($post_id, $cat_ids2, self::$taxonomyAgency, false);
-						// wp_set_object_terms($post_id, array("tag01", "tag02"), self::$taxonomyNewTag, false);
-						// agregar metadatos
-						add_post_meta($post_id, self::$prefixMeta .'input-guid', $i_guid, true);
-						add_post_meta($post_id, self::$prefixMeta .'input-url', $i_link);
-						add_post_meta($post_id, self::$prefixMeta .'input-image-url', $readOG['img']);
-						add_post_meta($post_id, self::$prefixMeta .'input-description', $readOG['description']);
-						add_post_meta($post_id, self::$prefixMeta .'input-pub-date', $i_pubDate);
-
-					} else {
-						error_log("Fallo al registrar 1 registro en la tabla ". $tableCron->getName());
+						} else {
+							error_log("Fallo al registrar 1 registro en la tabla ". $tableCron->getName());
+						}
 					}
-				}
 
+				}
 			}
 		}
 	}
@@ -562,26 +568,50 @@ class Anbnews_Admin_CustomPost {
 
 	/**
 	* Obtener HTML Y obtener OpenGraph metas
+	*
+	* @return Boolean|Array
 	*/
 	private function _getOpenGraph($url)
 	{
-		$html = file_get_contents($url);
-
-		/* get page's description */
-		$re ="<meta\s+property=['\"]??og:image['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
-		preg_match("/$re/siU", $html, $matches);
-		$img = $matches[1];
-
-		$re="<meta\s+name=['\"]??description['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
-		preg_match("/$re/siU", $html, $matches);
-		$desc = $matches[1];
-
-		$info = array(
-			"img" => $img,
-			"description" => $desc,
+		$rs = false;
+		$html = false;
+		$ctx = stream_context_create(array(
+			'http' => array(
+				'method' => "GET",
+				'timeout' => 5
+				)
+			)
 		);
 
-		return $info;
+		try {
+			$html = @file_get_contents($url, 0, $ctx);
+		} catch (Exception $e) { // echo $e->getMessage();
+			$html = false;
+		}
+
+		if ($html !== false) {
+			/* get page's description */
+			$re ="<meta\s+property=['\"]??og:image['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
+			preg_match("/$re/siU", $html, $matches);
+			$img = isset($matches[1]) ? $matches[1] : false;
+
+			if ($img == false) {
+				$re ="<link\s+href=['\"]??(.+)['\"]??\s+rel=['\"]??image_src['\"]??\s*\/?>";
+				preg_match("/$re/siU", $html, $matches);
+				$img = isset($matches[1]) ? $matches[1] : false;
+			}
+
+			$re="<meta\s+name=['\"]??description['\"]??\s+content=['\"]??(.+)['\"]??\s*\/?>";
+			preg_match("/$re/siU", $html, $matches);
+			$desc = isset($matches[1]) ? $matches[1] : false;
+
+			$rs = array(
+				"img" => $img,
+				"description" => $desc,
+			);
+		}
+
+		return $rs;
 	}
 
 	/**
