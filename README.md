@@ -1,6 +1,8 @@
 ### redame
 Plugin Cron
 
+**worpress** - **twig theme** - **plugin**
+
 
 ## Ejecutar cron
 
@@ -23,5 +25,5 @@ Agregar y ejecutar la tarea cada 15 minutos
 
 >15 * * * * wget -q -O - http://www.noticiasdelperu.net/wp-cron.php?anbnews_cron_read_feed
 
-## preview
+## Preview
 ![preview](README/screenshot.png)
