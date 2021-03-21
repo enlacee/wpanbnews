@@ -1,5 +1,4 @@
-### redame
-Plugin Cron
+### Plugin Cron with wordpress
 
 **worpress** - **twig theme** - **plugin**
 
