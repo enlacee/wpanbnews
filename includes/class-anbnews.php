@@ -132,6 +132,11 @@ class Anbnews {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-anbnews-i18n.php';
 
 		/**
+		* load library
+		*/
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'library/opengraph/OpenGraph.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-anbnews-admin.php';
@@ -205,6 +210,22 @@ class Anbnews {
 		//crons
 		$this->loader->add_action('anbnews_boj_cron_hook',$plugin ,'cron_email_reminder');
 		$this->loader->add_action('anbnews_cron_read_feed',$plugin ,'cron_read_feed');
+	}
+
+	public static function activate()
+	{
+		// add cron INSERT noticias
+		if (!wp_next_scheduled('anbnews_cron_read_feed')) {
+			wp_schedule_event(time(), 'hourly', 'anbnews_cron_read_feed');
+		}
+	}
+
+	public static function deactivate()
+	{
+		// remove cron
+		if (wp_next_scheduled('anbnews_cron_read_feed')) {
+			wp_clear_scheduled_hook('anbnews_cron_read_feed');
+		}
 	}
 
 	/**

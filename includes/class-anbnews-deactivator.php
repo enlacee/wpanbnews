@@ -30,7 +30,7 @@ class Anbnews_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+		Anbnews::deactivate();
 	}
 
 }

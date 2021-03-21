@@ -29,6 +29,7 @@ class Anbnews_Activator {
 	public static function activate()
 	{
 		$plugin = Anbnews::getInstance();
+		Anbnews::activate();
 
 		$my_options = $plugin->microData;
 		$my_options['install_date'] = date('Y-d-m H:i:s');
